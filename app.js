@@ -1,7 +1,9 @@
 // רישום Service Worker
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
+        navigator.serviceWorker.register('./sw.js', {
+            scope: '/notifications-pwa/'
+        })
             .then(registration => {
                 console.log('Service Worker נרשם בהצלחה:', registration);
             })
@@ -45,8 +47,8 @@ sendButton.addEventListener('click', async () => {
         const registration = await navigator.serviceWorker.ready;
         await registration.showNotification('הודעת בדיקה', {
             body: 'זוהי הודעת בדיקה מהמערכת',
-            icon: 'apple-touch-icon.png',
-            badge: 'apple-touch-icon.png'
+            icon: './apple-touch-icon.png',
+            badge: './apple-touch-icon.png'
         });
     } catch (error) {
         console.error('שגיאה בשליחת התראה:', error);
