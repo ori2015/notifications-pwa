@@ -27,7 +27,7 @@ async function subscribeUserToPush(registration) {
         console.log('נרשם בהצלחה:', subscription);
         
         // שליחת המידע לשרת
-        await fetch('http://localhost:3000/subscribe', {
+        await fetch('https://localhost:3443/subscribe', {
             method: 'POST',
             body: JSON.stringify(subscription),
             headers: {
@@ -58,6 +58,19 @@ function urlBase64ToUint8Array(base64String) {
     return outputArray;
 }
 
+// פונקציה לבדיקה אם המכשיר הוא iOS
+function isIOS() {
+    return [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+    ].includes(navigator.platform) ||
+    (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+}
+
 const subscribeButton = document.getElementById('subscribe');
 const sendButton = document.getElementById('send-notification');
 
@@ -66,9 +79,15 @@ subscribeButton.addEventListener('click', async () => {
     try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
-            const registration = await navigator.serviceWorker.ready;
-            await subscribeUserToPush(registration);
-            alert('נרשמת בהצלחה להתראות!');
+            if (isIOS()) {
+                // באייפון אנחנו נציג התראות מקומיות בלבד
+                alert('התראות מוגדרות! במכשירי iOS, אנו משתמשים בהתראות מקומיות בלבד.');
+            } else {
+                // מכשירים אחרים יכולים להשתמש ב-Push API
+                const registration = await navigator.serviceWorker.ready;
+                await subscribeUserToPush(registration);
+                alert('נרשמת בהצלחה להתראות!');
+            }
         } else {
             alert('לא ניתנה הרשאה להתראות');
         }
@@ -89,6 +108,15 @@ sendButton.addEventListener('click', async () => {
         });
     } catch (error) {
         console.error('שגיאה בשליחת התראה:', error);
-        alert('שגיאה בשליחת התראה. וודא שאתה משתמש בחיבור HTTPS ושאישרת קבלת התראות');
+        
+        // לאייפון, ננסה להשתמש בהתראה מקומית
+        if (isIOS() && 'Notification' in window) {
+            new Notification('הודעת בדיקה', {
+                body: 'זוהי הודעת בדיקה מהמערכת',
+                icon: './apple-touch-icon.png'
+            });
+        } else {
+            alert('שגיאה בשליחת התראה. וודא שאתה משתמש בחיבור HTTPS ושאישרת קבלת התראות');
+        }
     }
 }); 
