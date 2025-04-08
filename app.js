@@ -27,7 +27,18 @@ async function subscribeUserToPush(registration) {
         console.log('נרשם בהצלחה:', subscription);
         
         // שליחת המידע לשרת
-        await fetch('https://localhost:3443/subscribe', {
+        let serverUrl = '';
+        
+        // בדיקה אם האפליקציה רצה מטלפון
+        if (window.location.hostname === 'ori2015.github.io' || isIOS()) {
+            // כשהאתר רץ מהגיטהאב או כשזה אייפון
+            serverUrl = 'https://localhost:3443/subscribe';
+        } else {
+            // כשהאתר רץ מהמחשב המקומי
+            serverUrl = 'http://localhost:3000/subscribe';
+        }
+        
+        await fetch(serverUrl, {
             method: 'POST',
             body: JSON.stringify(subscription),
             headers: {

@@ -221,11 +221,11 @@ http.createServer(app).listen(port, () => {
 
 // בדיקה אם יש קבצי SSL
 try {
-    // נסה להפעיל שרת HTTPS אם יש קבצי SSL
-    if (fs.existsSync(path.join(__dirname, 'server.key')) && fs.existsSync(path.join(__dirname, 'server.cert'))) {
+    // נסה להפעיל שרת HTTPS עם קבצי SSL החדשים
+    if (fs.existsSync(path.join(__dirname, 'cert.key')) && fs.existsSync(path.join(__dirname, 'cert.crt'))) {
         const options = {
-            key: fs.readFileSync(path.join(__dirname, 'server.key')),
-            cert: fs.readFileSync(path.join(__dirname, 'server.cert'))
+            key: fs.readFileSync(path.join(__dirname, 'cert.key')),
+            cert: fs.readFileSync(path.join(__dirname, 'cert.crt'))
         };
         
         // הפעלת שרת HTTPS
@@ -235,10 +235,7 @@ try {
         });
     } else {
         console.log('לא נמצאו קבצי SSL. השרת פועל רק עם HTTP.');
-        console.log('כדי להפעיל את השרת עם HTTPS (נדרש לאייפון), צור קבצי SSL עם הפקודות:');
-        console.log('openssl genrsa -out server.key 2048');
-        console.log('openssl req -new -key server.key -out server.csr');
-        console.log('openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.cert');
+        console.log('כדי להפעיל את השרת עם HTTPS (נדרש לאייפון), צור קבצי SSL עם mkcert');
     }
 } catch (err) {
     console.error('שגיאה בהפעלת שרת HTTPS:', err);
